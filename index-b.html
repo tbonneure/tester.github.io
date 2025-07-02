@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scroll Timer with ScrollMagic</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      background-color: green;
+      height: 6000px;
+    }
+
+    .timer-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 2em;
+      font-weight: bold;
+      z-index: 1000;
+    }
+
+    h1.reveal {
+      opacity: 0;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3em;
+      text-align: center;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="timer-container" id="timer">0:00</div>
+
+  <!-- Reveal messages -->
+  <h1 id="revealText9min" class="reveal">You've reached 9 minutes!</h1>
+  <h1 id="revealText45min" class="reveal">You've reached 45 minutes!</h1>
+
+  <!-- ScrollMagic & GSAP libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/plugins/animation.gsap.min.js"></script>
+
+  <script>
+    const timer = document.getElementById('timer');
+    const maxTime = 90 * 60; // 5400 seconds
+
+    function updateTimer() {
+      const scrollTop = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const progress = Math.min(scrollTop / maxScroll, 1);
+      const currentTime = Math.floor(progress * maxTime);
+      const minutes = Math.floor(currentTime / 60);
+      const seconds = currentTime % 60;
+      timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    window.addEventListener('scroll', updateTimer);
+    window.addEventListener('load', updateTimer);
+
+    // ScrollMagic controller
+    const controller = new ScrollMagic.Controller();
+
+    // 9 minutes = 600px
+    new ScrollMagic.Scene({
+      triggerHook: 0.5,
+      offset: 600,
+      duration: 150
+    })
+    .setTween(gsap.to("#revealText9min", { opacity: 1, duration: 1 }))
+    .addTo(controller);
+
+    // 45 minutes = 3000px
+    new ScrollMagic.Scene({
+      triggerHook: 0.5,
+      offset: 3000,
+      duration: 150
+    })
+    .setTween(gsap.to("#revealText45min", { opacity: 1, duration: 1 }))
+    .addTo(controller);
+  </script>
+</body>
+</html>
