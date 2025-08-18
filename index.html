@@ -2,342 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Gyro‑controlled variable font</title>
-  <!-- Variable font via Google Fonts: Roboto Flex (axes include wght, wdth, opsz) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Variable Font Tilt Demo</title>
   <style>
-    :root {
-      --wght: 400;
-      --wdth: 100;
-      --opsz: 36;
-      --bg: #0f0f12;
-      --fg: #f2f4f8;
-      --muted: #98a2b3;
+    /* --- Load your variable font ---
+       Place varappVF.ttf in the same folder as this HTML file.
+       If your font has a different name, update the src url().
+    */
+    @font-face {
+      font-family: 'VarAppVF';
+      src: url('./varappVF.ttf') format('truetype');
+      font-weight: 1 1000; /* broad range so browsers treat it as variable */
+      font-stretch: 50% 200%;
+      font-style: normal;
     }
 
-    * { box-sizing: border-box; }
+    :root {
+      --bg: #000;
+      --fg: #fff;
+    }
 
-    html, body { height: 100%; }
-
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
       color: var(--fg);
-      background: radial-gradient(120vw 120vh at 50% -10%, #1b1e28, var(--bg));
-      -webkit-font-smoothing: antialiased;
-      touch-action: manipulation;
     }
 
     .wrap {
-      display: grid;
-      grid-template-rows: 1fr auto;
-      min-height: 100%;
-      padding: 6vh 4vw 6vh;
-      gap: 6vh;
-    }
-
-    .hero {
+      position: fixed;
+      inset: 0;
       display: grid;
       place-items: center;
-      text-align: center;
-      padding: 2rem;
-      border-radius: 1.5rem;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      touch-action: none; /* avoid accidental zoom/scroll while tilting */
     }
 
-    h1 {
+    .big {
+      font-family: 'VarAppVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: clamp(20vw, 40vw, 60vw); /* huge A */
+      line-height: 1;
       margin: 0;
-      font-family: "Roboto Flex", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      font-size: clamp(2.2rem, 8vw, 5rem);
-      line-height: 1.05;
-      letter-spacing: -0.01em;
-      /* live axes; JS updates these CSS variables */
-      font-variation-settings: "wght" var(--wght), "wdth" var(--wdth), "opsz" var(--opsz);
-      transition: font-variation-settings 50ms linear;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      font-variation-settings: "wght" 400, "wdth" 100;
+      transition: font-variation-settings 0.05s linear; /* small smoothing */
     }
 
-    .subtitle {
-      margin-top: 1rem;
-      color: var(--muted);
-      font-size: clamp(1rem, 3.5vw, 1.2rem);
-    }
-
-    .panel {
-      display: grid;
-      gap: 0.75rem;
-      padding: 1rem;
-      border-radius: 1rem;
-      background: rgba(255,255,255,0.03);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-    }
-
-    .row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-    .row strong { font-weight: 600; }
-
-    .button {
-      -webkit-appearance: none;
-      appearance: none;
-      border: 0;
-      background: #3b82f6;
-      color: white;
-      padding: 0.9rem 1.1rem;
-      font-size: 1rem;
-      border-radius: 0.9rem;
-      box-shadow: 0 8px 18px rgba(59,130,246,0.35);
-      font-weight: 650;
-    }
-
-    .button.secondary { background: #374151; box-shadow: none; }
-
-    .sliders { display: grid; gap: 0.75rem; }
-
-    input[type="range"] {
-      width: 100%;
-      height: 36px;
-      background: transparent;
-    }
-    input[type="range"]::-webkit-slider-runnable-track { height: 6px; background: #2b2f3a; border-radius: 999px; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; margin-top: -10px; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.35); border: 0; }
-    input[type="range"]::-moz-range-track { height: 6px; background: #2b2f3a; border-radius: 999px; }
-    input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; border: 0; }
-
-    .meter { font-variant-numeric: tabular-nums; opacity: 0.9; }
-
-    .toast {
-      position: fixed; inset: auto 1rem 1.2rem 1rem;
-      display: none; /* toggled by JS */
-      padding: 0.85rem 1rem;
-      border-radius: 0.9rem;
-      background: rgba(20, 20, 24, 0.9);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--fg);
-      font-size: 0.95rem;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-    }
-
-    .perm-overlay {
-      position: fixed; inset: 0;
-      display: grid; place-items: center;
-      background: rgba(10, 12, 16, 0.85);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 6vw;
+    .ui {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font: 12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      opacity: 0.7;
       text-align: center;
+      user-select: none;
     }
-    .perm-card {
-      max-width: 540px;
-      display: grid; gap: 1rem;
-      background: #151821;
-      padding: 1.2rem;
-      border-radius: 1.2rem;
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-    }
-    .perm-card h2 { margin: 0; font-size: 1.4rem; }
-    .perm-card p { margin: 0; color: var(--muted); }
 
-    @media (min-width: 768px) {
-      .wrap { padding: 8vh 8vw; }
+    .btn {
+      appearance: none;
+      border: 1px solid #444;
+      background: #111;
+      color: #fff;
+      padding: 0.6rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
     }
+
+    .btn:active { transform: translateY(1px); }
+
+    .row { margin-top: 0.5rem; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <div>
-        <h1 id="sample">Tilt je iPhone: de letters leven mee</h1>
-        <p class="subtitle">Voorgrond: gyroscoop → <code>wght</code> & <code>wdth</code> van Roboto Flex. Tik hieronder op <em>Beweegtoegang</em> op iOS.</p>
-      </div>
-    </section>
+  <main class="wrap">
+    <h1 class="big" id="glyph">A</h1>
+  </main>
 
-    <section class="panel" aria-live="polite">
-      <div class="row">
-        <strong>Status</strong>
-        <span id="status" class="meter">stand‑by</span>
-      </div>
-      <div class="row">
-        <strong>Gewicht</strong>
-        <span class="meter"><span id="wghtOut">400</span></span>
-      </div>
-      <div class="row">
-        <strong>Breedte</strong>
-        <span class="meter"><span id="wdthOut">100</span>%</span>
-      </div>
-
-      <div class="row" id="controls">
-        <button id="permBtn" class="button">Beweegtoegang</button>
-        <button id="calBtn" class="button secondary" disabled>Kalibreren</button>
-      </div>
-
-      <div id="fallback" class="sliders" hidden>
-        <div class="row"><label for="wght">Gewicht</label><input id="wght" type="range" min="100" max="900" value="400" step="1"></div>
-        <div class="row"><label for="wdth">Breedte</label><input id="wdth" type="range" min="75" max="125" value="100" step="1"></div>
-      </div>
-    </section>
-  </div>
-
-  <div id="toast" class="toast" role="status"></div>
-
-  <div id="permOverlay" class="perm-overlay" hidden>
-    <div class="perm-card">
-      <h2>Toegang tot bewegingssensor</h2>
-      <p>iOS vraagt een tik voordat de gyroscoop werkt. Tik op <strong>Beweegtoegang</strong> om de demo te starten.</p>
-      <button class="button" id="overlayBtn">Beweegtoegang</button>
+  <div class="ui" id="status">
+    <div id="supportMsg">Tilt your iPhone to animate the font.</div>
+    <div class="row">
+      <button class="btn" id="enableBtn" hidden>Enable Motion</button>
     </div>
+    <div class="row" id="readout" aria-live="polite"></div>
   </div>
 
   <script>
-    // --- diagnostics -------------------------------------------------------
-    const env = {
-      secure: window.isSecureContext,
-      iOS: (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
-      inApp: /(FBAN|FBAV|Instagram|Line|Wechat|Twitter|LinkedIn|Pinterest|Snapchat|TikTok)/i.test(navigator.userAgent),
-      safari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-    };
+    // Axis tags you want to drive. Change these if your font uses custom axes.
+    // You can also override via URL params: ?axis1=wgHt&axis2=wdTh&wmin=100&wmax=900&dmin=75&dmax=125
+    const params = new URLSearchParams(location.search);
+    const AXIS1 = (params.get('axis1') || 'wght').toLowerCase();
+    const AXIS2 = (params.get('axis2') || 'wdth').toLowerCase();
+    const WGHT_MIN = parseFloat(params.get('wmin') || 100);
+    const WGHT_MAX = parseFloat(params.get('wmax') || 900);
+    const WDTH_MIN = parseFloat(params.get('dmin') || 75);
+    const WDTH_MAX = parseFloat(params.get('dmax') || 125);
 
-    // --- helpers -----------------------------------------------------------
-    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-    const map = (v, inMin, inMax, outMin, outMax) => {
-      const t = (v - inMin) / (inMax - inMin);
-      return outMin + (outMax - outMin) * t;
-    };
+    const glyph = document.getElementById('glyph');
+    const readout = document.getElementById('readout');
+    const enableBtn = document.getElementById('enableBtn');
+    const supportMsg = document.getElementById('supportMsg');
 
-    const qs = s => document.querySelector(s);
-    const sample = qs('#sample');
-    const statusEl = qs('#status');
-    const wghtOut = qs('#wghtOut');
-    const wdthOut = qs('#wdthOut');
-    const permBtn = qs('#permBtn');
-    const calBtn = qs('#calBtn');
-    const fallback = qs('#fallback');
-    const toast = qs('#toast');
-    const permOverlay = qs('#permOverlay');
-    const overlayBtn = qs('#overlayBtn');
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+    function map(n, inMin, inMax, outMin, outMax) {
+      const t = (n - inMin) / (inMax - inMin);
+      return outMin + (outMax - outMin) * clamp(t, 0, 1);
+    }
 
-    // axis ranges for Roboto Flex
-    const WGHT_MIN = 200, WGHT_MAX = 900;      // practical range
-    const WDTH_MIN = 75,  WDTH_MAX = 125;      // % of normal
-
-    // deviceorientation ranges
-    const BETA_RANGE = 45;   // front-back tilt ±45°
-    const GAMMA_RANGE = 30;  // left-right tilt ±30°
-
-    // smoothing
-    let wght = 400, wdth = 100;
-    let targetWght = wght, targetWdth = wdth;
-    let rafId = null;
-
-    // calibration offsets
-    let baseBeta = 0, baseGamma = 0;
-
-    function updateFontAxes() {
-      const SMOOTH = 0.12;
-      wght += (targetWght - wght) * SMOOTH;
-      wdth += (targetWdth - wdth) * SMOOTH;
-      document.documentElement.style.setProperty('--wght', wght.toFixed(1));
-      document.documentElement.style.setProperty('--wdth', wdth.toFixed(1));
-      wghtOut.textContent = Math.round(wght);
-      wdthOut.textContent = Math.round(wdth);
-      rafId = requestAnimationFrame(updateFontAxes);
+    function setAxes(wght, wdth) {
+      // Compose CSS with whatever axis tags you configured
+      const s = `"${AXIS1}" ${wght.toFixed(0)}, "${AXIS2}" ${wdth.toFixed(0)}`;
+      glyph.style.fontVariationSettings = s;
     }
 
     function onOrientation(e) {
-      let { beta, gamma } = e; // beta: front/back (-180..180), gamma: left/right (-90..90)
-      if (beta == null || gamma == null) return;
-      beta -= baseBeta; gamma -= baseGamma;
-      const tw = clamp(map(beta, -BETA_RANGE, BETA_RANGE, WGHT_MIN, WGHT_MAX), WGHT_MIN, WGHT_MAX);
-      const td = clamp(map(gamma, -GAMMA_RANGE, GAMMA_RANGE, WDTH_MIN, WDTH_MAX), WDTH_MIN, WDTH_MAX);
-      targetWght = tw; targetWdth = td;
+      // iOS returns beta [-180,180], gamma [-90,90]
+      const beta = e.beta || 0;   // front/back tilt
+      const gamma = e.gamma || 0; // left/right tilt
+
+      const wght = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);  // face-up to face-down
+      const wdth = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX); // left to right
+
+      setAxes(wght, wdth);
+      readout.textContent = `${AXIS1.toUpperCase()}: ${wght.toFixed(0)}  ${AXIS2.toUpperCase()}: ${wdth.toFixed(0)}`;
     }
 
-    function calibrateOnce() {
-      function capture(e) {
-        if (e.beta == null || e.gamma == null) return;
-        baseBeta = e.beta; baseGamma = e.gamma;
-        window.removeEventListener('deviceorientation', capture);
-        showToast('Geijkt op huidige stand.');
-      }
-      window.addEventListener('deviceorientation', capture, { once: true });
-    }
-
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => (toast.style.display = 'none'), 2600);
-    }
-
-    function enableFallbackControls(reason = '') {
-      fallback.hidden = false;
-      const w = qs('#wght');
-      const d = qs('#wdth');
-      w.oninput = () => (targetWght = clamp(+w.value, WGHT_MIN, WGHT_MAX));
-      d.oninput = () => (targetWdth = clamp(+d.value, WDTH_MIN, WDTH_MAX));
-      statusEl.textContent = 'handmatig' + (reason ? ` (${reason})` : '');
-      if (rafId == null) rafId = requestAnimationFrame(updateFontAxes);
-      showToast('Geen sensors: handmatige modus actief.');
-    }
-
-    function startSensors() {
-      if (rafId == null) rafId = requestAnimationFrame(updateFontAxes);
-      window.addEventListener('deviceorientation', onOrientation);
-      statusEl.textContent = 'actief';
-      calBtn.disabled = false;
-      permOverlay.hidden = true;
-      showToast('Sensoren actief. Kantel om te spelen.');
-    }
-
-    async function requestIOSPermissionIfNeeded() {
-      // guardrails
-      if (!env.secure) {
-        enableFallbackControls('geen https');
-        showToast('Open deze pagina via HTTPS.');
-        return;
-      }
-      if (env.iOS && !env.safari) {
-        // Many in‑app browsers block sensors
-        enableFallbackControls('open in Safari');
-        showToast('Open in Safari (niet in app-browser).');
+    async function initMotion() {
+      // Check support
+      const supportsVar = CSS.supports('font-variation-settings', '"wght" 400');
+      if (!supportsVar) {
+        supportMsg.textContent = 'Your browser does not support variable fonts.';
         return;
       }
 
-      const needIOSPermission = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
-      if (!needIOSPermission) { startSensors(); return; }
+      // iOS 13+ needs a user gesture to grant motion access
+      const needsPermission = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
 
-      // show overlay to guarantee a user gesture
-      permOverlay.hidden = false;
-
-      const ask = async () => {
-        try {
-          const state = await DeviceOrientationEvent.requestPermission();
-          if (state === 'granted') {
-            startSensors();
-          } else if (state === 'denied') {
-            enableFallbackControls('toestemming geweigerd');
-            showToast('Zet "Motion & Orientation Access" aan in iOS > Instellingen > Safari.');
-          } else {
-            enableFallbackControls('onbekende status');
+      if (needsPermission) {
+        enableBtn.hidden = false;
+        supportMsg.textContent = 'Tap “Enable Motion” then tilt your iPhone.';
+        enableBtn.addEventListener('click', async () => {
+          try {
+            const res = await DeviceMotionEvent.requestPermission();
+            if (res === 'granted') {
+              enableBtn.hidden = true;
+              supportMsg.textContent = 'Motion enabled. Tilt to animate.';
+              window.addEventListener('deviceorientation', onOrientation);
+            } else {
+              supportMsg.textContent = 'Motion permission denied.';
+            }
+          } catch (err) {
+            supportMsg.textContent = 'Motion permission failed.';
           }
-        } catch (err) {
-          enableFallbackControls('fout: ' + (err && err.message ? err.message : 'onbekend'));
-        }
-      };
+        }, { once: true });
+      } else {
+        // Non-iOS or already permitted
+        window.addEventListener('deviceorientation', onOrientation);
+      }
 
-      overlayBtn.addEventListener('click', ask, { once: true });
+      // Initialize with mid-values so it looks good before motion events arrive
+      setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
     }
 
-    // wire up UI
-    permBtn.addEventListener('click', requestIOSPermissionIfNeeded);
-    calBtn.addEventListener('click', calibrateOnce);
-
-    // auto-start when possible (e.g., Android/desktop over HTTPS)
-    window.addEventListener('load', () => {
-      if (env.secure && (!env.iOS || (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function'))) {
-        startSensors();
-      }
-    });
+    initMotion();
   </script>
 </body>
 </html>
