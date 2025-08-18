@@ -139,27 +139,7 @@
       // iOS 13+ needs a user gesture to grant motion access
       const needsPermission = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
 
-      if (needsPermission) {
-        enableBtn.hidden = false;
-        supportMsg.textContent = 'Tap “Enable Motion” then tilt your iPhone.';
-        enableBtn.addEventListener('click', async () => {
-          try {
-            const res = await DeviceMotionEvent.requestPermission();
-            if (res === 'granted') {
-              enableBtn.hidden = true;
-              supportMsg.textContent = 'Motion enabled. Tilt to animate.';
-              window.addEventListener('deviceorientation', onOrientation);
-            } else {
-              supportMsg.textContent = 'Motion permission denied.';
-            }
-          } catch (err) {
-            supportMsg.textContent = 'Motion permission failed.';
-          }
-        }, { once: true });
-      } else {
-        // Non-iOS or already permitted
-        window.addEventListener('deviceorientation', onOrientation);
-      }
+   
 
       // Initialize with mid-values so it looks good before motion events arrive
       setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
