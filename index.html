@@ -15,15 +15,26 @@
     :root { --bg:#000; --fg:#fff; }
     html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); }
     .wrap { position:fixed; inset:0; display:grid; place-items:center; touch-action:none; }
-    .big { font-family:'VarAppVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-           font-size:clamp(80vw, 80vw, 80vw); line-height:1; margin:0;
-           text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased;
-           font-variation-settings:"wght" 400, "wdth" 100; transition: font-variation-settings .05s linear;}
-    .ui { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
-          font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-          opacity:.7; text-align:center; user-select:none; }
-    .btn { appearance:none; border:1px solid #444; background:#111; color:#fff;
-           padding:.6rem .9rem; border-radius:999px; cursor:pointer; font-weight:600; }
+    .big {
+      font-family:'VarAppVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      /* Fit viewport with 10px margin */
+      font-size: calc(min(100vw, 100vh) - 20px);
+      line-height:1;
+      margin:0;
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+      font-variation-settings:"wght" 400, "wdth" 100;
+      transition: font-variation-settings .05s linear;
+    }
+    .ui {
+      position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
+      font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      opacity:.7; text-align:center; user-select:none;
+    }
+    .btn {
+      appearance:none; border:1px solid #444; background:#111; color:#fff;
+      padding:.6rem .9rem; border-radius:999px; cursor:pointer; font-weight:600;
+    }
     .btn:active { transform: translateY(1px); }
     .row { margin-top:.5rem; }
   </style>
@@ -39,7 +50,6 @@
   </div>
 
   <script>
-    // Configurable axis/ranges
     const params = new URLSearchParams(location.search);
     const AXIS1 = (params.get('axis1') || 'wght').toLowerCase();
     const AXIS2 = (params.get('axis2') || 'wdth').toLowerCase();
@@ -71,10 +81,8 @@
       readout.textContent = `${AXIS1.toUpperCase()}: ${wght.toFixed(0)}  ${AXIS2.toUpperCase()}: ${wdth.toFixed(0)}`;
     }
 
-    // Init axes to middle values
     setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
 
-    // Strict synchronous click handler for iOS
     enableBtn.onclick = () => {
       if (typeof DeviceMotionEvent !== 'undefined' &&
           typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -90,7 +98,6 @@
           supportMsg.textContent = 'Permission failed: ' + err;
         });
       } else {
-        // Non-iOS (or older iOS) fallback
         window.addEventListener('deviceorientation', onOrientation);
         enableBtn.style.display = 'none';
         supportMsg.textContent = 'Tilt your device!';
