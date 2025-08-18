@@ -5,92 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Variable Font Tilt Demo</title>
   <style>
-    /* --- Load your variable font ---
-       Place varappVF.ttf in the same folder as this HTML file.
-       If your font has a different name, update the src url().
-    */
     @font-face {
       font-family: 'VarAppVF';
       src: url('./varappVF.ttf') format('truetype');
-      font-weight: 1 1000; /* broad range so browsers treat it as variable */
+      font-weight: 1 1000;
       font-stretch: 50% 200%;
       font-style: normal;
     }
-
-    :root {
-      --bg: #000;
-      --fg: #fff;
-    }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-    }
-
-    .wrap {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      touch-action: none; /* avoid accidental zoom/scroll while tilting */
-    }
-
-    .big {
-      font-family: 'VarAppVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: clamp(20vw, 40vw, 60vw); /* huge A */
-      line-height: 1;
-      margin: 0;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      font-variation-settings: "wght" 400, "wdth" 100;
-      transition: font-variation-settings 0.05s linear; /* small smoothing */
-    }
-
-    .ui {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font: 12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      opacity: 0.7;
-      text-align: center;
-      user-select: none;
-    }
-
-    .btn {
-      appearance: none;
-      border: 1px solid #444;
-      background: #111;
-      color: #fff;
-      padding: 0.6rem 0.9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
+    :root { --bg:#000; --fg:#fff; }
+    html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); }
+    .wrap { position:fixed; inset:0; display:grid; place-items:center; touch-action:none; }
+    .big { font-family:'VarAppVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+           font-size:clamp(20vw, 40vw, 60vw); line-height:1; margin:0;
+           text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased;
+           font-variation-settings:"wght" 400, "wdth" 100; transition: font-variation-settings .05s linear;}
+    .ui { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
+          font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          opacity:.7; text-align:center; user-select:none; }
+    .btn { appearance:none; border:1px solid #444; background:#111; color:#fff;
+           padding:.6rem .9rem; border-radius:999px; cursor:pointer; font-weight:600; }
     .btn:active { transform: translateY(1px); }
-
-    .row { margin-top: 0.5rem; }
+    .row { margin-top:.5rem; }
   </style>
 </head>
 <body>
   <main class="wrap">
     <h1 class="big" id="glyph">A</h1>
   </main>
-
-  <div class="ui" id="status">
-    <div id="supportMsg">Tilt your iPhone to animate the font.</div>
-    <div class="row">
-      <button class="btn" id="enableBtn" hidden>Enable Motion</button>
-    </div>
+  <div class="ui">
+    <div id="supportMsg">Tap “Enable Motion” then tilt your iPhone.</div>
+    <div class="row"><button class="btn" id="enableBtn">Enable Motion</button></div>
     <div class="row" id="readout" aria-live="polite"></div>
   </div>
 
   <script>
-    // Axis tags you want to drive. Change these if your font uses custom axes.
-    // You can also override via URL params: ?axis1=wgHt&axis2=wdTh&wmin=100&wmax=900&dmin=75&dmax=125
+    // Configurable axis/ranges
     const params = new URLSearchParams(location.search);
     const AXIS1 = (params.get('axis1') || 'wght').toLowerCase();
     const AXIS2 = (params.get('axis2') || 'wdth').toLowerCase();
@@ -101,51 +50,52 @@
 
     const glyph = document.getElementById('glyph');
     const readout = document.getElementById('readout');
-    const enableBtn = document.getElementById('enableBtn');
     const supportMsg = document.getElementById('supportMsg');
+    const enableBtn = document.getElementById('enableBtn');
 
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
     function map(n, inMin, inMax, outMin, outMax) {
       const t = (n - inMin) / (inMax - inMin);
       return outMin + (outMax - outMin) * clamp(t, 0, 1);
     }
-
     function setAxes(wght, wdth) {
-      // Compose CSS with whatever axis tags you configured
       const s = `"${AXIS1}" ${wght.toFixed(0)}, "${AXIS2}" ${wdth.toFixed(0)}`;
       glyph.style.fontVariationSettings = s;
     }
-
     function onOrientation(e) {
-      // iOS returns beta [-180,180], gamma [-90,90]
       const beta = e.beta || 0;   // front/back tilt
       const gamma = e.gamma || 0; // left/right tilt
-
-      const wght = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);  // face-up to face-down
-      const wdth = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX); // left to right
-
+      const wght = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);
+      const wdth = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX);
       setAxes(wght, wdth);
       readout.textContent = `${AXIS1.toUpperCase()}: ${wght.toFixed(0)}  ${AXIS2.toUpperCase()}: ${wdth.toFixed(0)}`;
     }
 
-    async function initMotion() {
-      // Check support
-      const supportsVar = CSS.supports('font-variation-settings', '"wght" 400');
-      if (!supportsVar) {
-        supportMsg.textContent = 'Your browser does not support variable fonts.';
-        return;
+    // Init axes to middle values
+    setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
+
+    // Strict synchronous click handler for iOS
+    enableBtn.onclick = () => {
+      if (typeof DeviceMotionEvent !== 'undefined' &&
+          typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(res => {
+          if (res === 'granted') {
+            window.addEventListener('deviceorientation', onOrientation);
+            enableBtn.style.display = 'none';
+            supportMsg.textContent = 'Tilt your iPhone!';
+          } else {
+            supportMsg.textContent = 'Permission denied.';
+          }
+        }).catch(err => {
+          supportMsg.textContent = 'Permission failed: ' + err;
+        });
+      } else {
+        // Non-iOS (or older iOS) fallback
+        window.addEventListener('deviceorientation', onOrientation);
+        enableBtn.style.display = 'none';
+        supportMsg.textContent = 'Tilt your device!';
       }
-
-      // iOS 13+ needs a user gesture to grant motion access
-      const needsPermission = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
-
-   
-
-      // Initialize with mid-values so it looks good before motion events arrive
-      setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
-    }
-
-    initMotion();
+    };
   </script>
 </body>
 </html>
