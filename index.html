@@ -78,9 +78,9 @@
       const gamma = e.gamma || 0; // left/right tilt
 
       // Map tilt to axes
-      const wdth = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);
-      const wght = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX);
-      setAxes(wght, wdth);
+      const wdth = map(beta, -45, 45, WDTH_MIN, WDTH_MAX);
+      const wght = map(gamma, -45, 45, WGHT_MIN, WGHT_MAX);
+      setAxes(wdth, wght);
 
       // Map gamma [-45,45] → hue [0,360]
       const hue = map(gamma, -45, 45, 0, 360);
