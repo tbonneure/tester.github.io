@@ -1,91 +1,328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Scroll Timer with ScrollMagic</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Gyro‑controlled variable font</title>
+  <!-- Variable font via Google Fonts: Roboto Flex (axes include wght, wdth, opsz) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --wght: 400;
+      --wdth: 100;
+      --opsz: 36;
+      --bg: #0f0f12;
+      --fg: #f2f4f8;
+      --muted: #98a2b3;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      color: white;
-      background-color: green;
-      height: 6000px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--fg);
+      background: radial-gradient(120vw 120vh at 50% -10%, #1b1e28, var(--bg));
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
     }
 
-    .timer-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 2em;
-      font-weight: bold;
-      z-index: 1000;
+    .wrap {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: 100%;
+      padding: 6vh 4vw 6vh;
+      gap: 6vh;
     }
 
-    h1.reveal {
-      opacity: 0;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 3em;
+    .hero {
+      display: grid;
+      place-items: center;
       text-align: center;
-      pointer-events: none;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Roboto Flex", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      /* live axes; JS updates these CSS variables */
+      font-variation-settings: "wght" var(--wght), "wdth" var(--wdth), "opsz" var(--opsz);
+      transition: font-variation-settings 50ms linear;
+    }
+
+    .subtitle {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: clamp(1rem, 3.5vw, 1.2rem);
+    }
+
+    .panel {
+      display: grid;
+      gap: 0.75rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.03);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .row strong { font-weight: 600; }
+
+    .button {
+      -webkit-appearance: none;
+      appearance: none;
+      border: 0;
+      background: #3b82f6;
+      color: white;
+      padding: 0.9rem 1.1rem;
+      font-size: 1rem;
+      border-radius: 0.9rem;
+      box-shadow: 0 8px 18px rgba(59,130,246,0.35);
+      font-weight: 650;
+    }
+
+    .button.secondary { background: #374151; box-shadow: none; }
+
+    .sliders { display: grid; gap: 0.75rem; }
+
+    input[type="range"] {
+      width: 100%;
+      height: 36px;
+      background: transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track { height: 6px; background: #2b2f3a; border-radius: 999px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; margin-top: -10px; width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.35); border: 0; }
+    input[type="range"]::-moz-range-track { height: 6px; background: #2b2f3a; border-radius: 999px; }
+    input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; border: 0; }
+
+    .meter { font-variant-numeric: tabular-nums; opacity: 0.9; }
+
+    .toast {
+      position: fixed; inset: auto 1rem 1.2rem 1rem;
+      display: none; /* toggled by JS */
+      padding: 0.85rem 1rem;
+      border-radius: 0.9rem;
+      background: rgba(20, 20, 24, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--fg);
+      font-size: 0.95rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
+
+    .perm-overlay {
+      position: fixed; inset: 0;
+      display: grid; place-items: center;
+      background: rgba(10, 12, 16, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 6vw;
+      text-align: center;
+    }
+    .perm-card {
+      max-width: 540px;
+      display: grid; gap: 1rem;
+      background: #151821;
+      padding: 1.2rem;
+      border-radius: 1.2rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    }
+    .perm-card h2 { margin: 0; font-size: 1.4rem; }
+    .perm-card p { margin: 0; color: var(--muted); }
+
+    @media (min-width: 768px) {
+      .wrap { padding: 8vh 8vw; }
     }
   </style>
 </head>
 <body>
-  <div class="timer-container" id="timer">0:00</div>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1 id="sample">Tilt je iPhone: de letters leven mee</h1>
+        <p class="subtitle">Voorgrond: gyroscoop → <code>wght</code> & <code>wdth</code> van Roboto Flex. Tik hieronder op <em>Beweegtoegang</em> op iOS.</p>
+      </div>
+    </section>
 
-  <!-- Reveal messages -->
-  <h1 id="revealText9min" class="reveal">You've reached 9 minutes!</h1>
-  <h1 id="revealText45min" class="reveal">You've reached 45 minutes!</h1>
+    <section class="panel" aria-live="polite">
+      <div class="row">
+        <strong>Status</strong>
+        <span id="status" class="meter">stand‑by</span>
+      </div>
+      <div class="row">
+        <strong>Gewicht</strong>
+        <span class="meter"><span id="wghtOut">400</span></span>
+      </div>
+      <div class="row">
+        <strong>Breedte</strong>
+        <span class="meter"><span id="wdthOut">100</span>%</span>
+      </div>
 
-  <!-- ScrollMagic & GSAP libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/plugins/animation.gsap.min.js"></script>
+      <div class="row" id="controls">
+        <button id="permBtn" class="button">Beweegtoegang</button>
+        <button id="calBtn" class="button secondary" disabled>Kalibreren</button>
+      </div>
+
+      <div id="fallback" class="sliders" hidden>
+        <div class="row"><label for="wght">Gewicht</label><input id="wght" type="range" min="100" max="900" value="400" step="1"></div>
+        <div class="row"><label for="wdth">Breedte</label><input id="wdth" type="range" min="75" max="125" value="100" step="1"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="permOverlay" class="perm-overlay" hidden>
+    <div class="perm-card">
+      <h2>Toegang tot bewegingssensor</h2>
+      <p>iOS vraagt een tik voordat de gyroscoop werkt. Tik op <strong>Beweegtoegang</strong> om de demo te starten.</p>
+      <button class="button" id="overlayBtn">Beweegtoegang</button>
+    </div>
+  </div>
 
   <script>
-    const timer = document.getElementById('timer');
-    const maxTime = 90 * 60; // 5400 seconds
+    // --- helpers -----------------------------------------------------------
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+    const map = (v, inMin, inMax, outMin, outMax) => {
+      const t = (v - inMin) / (inMax - inMin);
+      return outMin + (outMax - outMin) * t;
+    };
 
-    function updateTimer() {
-      const scrollTop = window.scrollY;
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrollTop / maxScroll, 1);
-      const currentTime = Math.floor(progress * maxTime);
-      const minutes = Math.floor(currentTime / 60);
-      const seconds = currentTime % 60;
-      timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const qs = s => document.querySelector(s);
+    const sample = qs('#sample');
+    const statusEl = qs('#status');
+    const wghtOut = qs('#wghtOut');
+    const wdthOut = qs('#wdthOut');
+    const permBtn = qs('#permBtn');
+    const calBtn = qs('#calBtn');
+    const fallback = qs('#fallback');
+    const toast = qs('#toast');
+    const permOverlay = qs('#permOverlay');
+    const overlayBtn = qs('#overlayBtn');
+
+    // axis ranges for Roboto Flex
+    const WGHT_MIN = 200, WGHT_MAX = 900;      // practical range
+    const WDTH_MIN = 75,  WDTH_MAX = 125;      // % of normal (Roboto Flex uses 25..151, we keep it moderate)
+
+    // deviceorientation ranges
+    const BETA_RANGE = 45;   // front-back tilt ±45°
+    const GAMMA_RANGE = 30;  // left-right tilt ±30°
+
+    // smoothing
+    let wght = 400, wdth = 100;
+    let targetWght = wght, targetWdth = wdth;
+    let rafId = null;
+
+    // calibration offsets
+    let baseBeta = 0, baseGamma = 0;
+
+    function updateFontAxes() {
+      // simple low-pass filter for smooth animation
+      const SMOOTH = 0.12;
+      wght += (targetWght - wght) * SMOOTH;
+      wdth += (targetWdth - wdth) * SMOOTH;
+      document.documentElement.style.setProperty('--wght', wght.toFixed(1));
+      document.documentElement.style.setProperty('--wdth', wdth.toFixed(1));
+      wghtOut.textContent = Math.round(wght);
+      wdthOut.textContent = Math.round(wdth);
+      rafId = requestAnimationFrame(updateFontAxes);
     }
 
-    window.addEventListener('scroll', updateTimer);
-    window.addEventListener('load', updateTimer);
+    function onOrientation(e) {
+      let { beta, gamma } = e; // beta: front/back (-180..180), gamma: left/right (-90..90)
+      if (beta == null || gamma == null) return;
 
-    // ScrollMagic controller
-    const controller = new ScrollMagic.Controller();
+      // apply calibration
+      beta -= baseBeta; gamma -= baseGamma;
 
-    // 9 minutes = 600px
-    new ScrollMagic.Scene({
-      triggerHook: 0.5,
-      offset: 600,
-      duration: 150
-    })
-    .setTween(gsap.to("#revealText9min", { opacity: 1, duration: 1 }))
-    .addTo(controller);
+      // map to axis ranges
+      const tw = clamp(map(beta, -BETA_RANGE, BETA_RANGE, WGHT_MIN, WGHT_MAX), WGHT_MIN, WGHT_MAX);
+      const td = clamp(map(gamma, -GAMMA_RANGE, GAMMA_RANGE, WDTH_MIN, WDTH_MAX), WDTH_MIN, WDTH_MAX);
+      targetWght = tw; targetWdth = td;
+    }
 
-    // 45 minutes = 3000px
-    new ScrollMagic.Scene({
-      triggerHook: 0.5,
-      offset: 3000,
-      duration: 150
-    })
-    .setTween(gsap.to("#revealText45min", { opacity: 1, duration: 1 }))
-    .addTo(controller);
+    function calibrateOnce() {
+      function capture(e) {
+        if (e.beta == null || e.gamma == null) return;
+        baseBeta = e.beta; baseGamma = e.gamma;
+        window.removeEventListener('deviceorientation', capture);
+        showToast('Geijkt op huidige stand. Veel plezier!');
+      }
+      window.addEventListener('deviceorientation', capture, { once: true });
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => (toast.style.display = 'none'), 2400);
+    }
+
+    function enableFallbackControls() {
+      fallback.hidden = false;
+      const w = qs('#wght');
+      const d = qs('#wdth');
+      w.oninput = () => (targetWght = clamp(+w.value, WGHT_MIN, WGHT_MAX));
+      d.oninput = () => (targetWdth = clamp(+d.value, WDTH_MIN, WDTH_MAX));
+      statusEl.textContent = 'handmatig';
+      showToast('Geen sensors: handmatige modus actief.');
+    }
+
+    function startSensors() {
+      if (rafId == null) rafId = requestAnimationFrame(updateFontAxes);
+      window.addEventListener('deviceorientation', onOrientation);
+      statusEl.textContent = 'actief';
+      calBtn.disabled = false;
+      permOverlay.hidden = true;
+      showToast('Sensoren actief. Kantel om te spelen.');
+    }
+
+    async function requestIOSPermissionIfNeeded() {
+      // iOS 13+: permission required for motion/orientation
+      const needIOSPermission = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
+      if (!needIOSPermission) { startSensors(); return; }
+
+      // show overlay to guarantee a user gesture
+      permOverlay.hidden = false;
+
+      const ask = async () => {
+        try {
+          const state = await DeviceOrientationEvent.requestPermission();
+          if (state === 'granted') {
+            startSensors();
+          } else {
+            // denied -> use fallback sliders
+            permOverlay.hidden = true;
+            enableFallbackControls();
+          }
+        } catch (err) {
+          permOverlay.hidden = true;
+          enableFallbackControls();
+        }
+      };
+
+      overlayBtn.addEventListener('click', ask, { once: true });
+    }
+
+    // wire up UI
+    permBtn.addEventListener('click', requestIOSPermissionIfNeeded);
+    calBtn.addEventListener('click', calibrateOnce);
+
+    // auto-start on non‑iOS (or if permission not required)
+    window.addEventListener('load', () => {
+      // Only auto-start if the page is served over HTTPS (required by many browsers)
+      const isSecure = window.isSecureContext;
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isSecure && !isiOS) startSensors();
+    });
   </script>
 </body>
 </html>
