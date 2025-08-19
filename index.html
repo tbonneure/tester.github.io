@@ -1,4 +1,4 @@
-	•	<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -6,38 +6,67 @@
   <title>Variable Font Tilt Demo</title>
   <style>
     @font-face {
-      font-family: 'balanceVF';
-      src: url('balanceVF.ttf') format('truetype');
+      font-family: 'BalaVF';
+      src: url('balaVF.ttf') format('truetype');
       font-weight: 1 1000;
-      font-stretch: 100% 200%;
+      font-stretch: 50% 200%;
       font-style: normal;
     }
-    :root { --bg:#000; --fg:#fff; }
-    html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); }
-    .wrap { position:static; inset:0; display:grid; place-items:center; touch-action:none; }
+
+    :root {
+      --bg: #000;
+      --fg: #fff;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    .wrap {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      touch-action: none;
+    }
+
     .big {
-      font-family:'balanceVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      /* Fit viewport with 10px margin */
-      font-size: calc(min(100vw, 100vh) * 1.5)!important;
-      line-height:1;
-      margin:0;
-      text-rendering:optimizeLegibility;
-      -webkit-font-smoothing:antialiased;
-      font-variation-settings:"wght" 400, "wdth" 100;
-      transition: font-variation-settings .05s linear, color .1s linear;
-      color: white; /* start white */
+      font-family: 'BalaVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: calc(min(100vw, 100vh) - 20px);
+      line-height: 1;
+      margin: 0;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      font-variation-settings: "wght" 400, "wdth" 100;
+      transition: font-variation-settings 0.05s linear;
     }
+
     .ui {
-      position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
-      font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      opacity:.7; text-align:center; user-select:none;
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font: 12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      opacity: 0.7;
+      text-align: center;
+      user-select: none;
     }
+
     .btn {
-      appearance:none; border:1px solid #444; background:#111; color:#fff;
-      padding:.6rem .9rem; border-radius:999px; cursor:pointer; font-weight:600;
+      appearance: none;
+      border: 1px solid #444;
+      background: #111;
+      color: #fff;
+      padding: 0.6rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
     }
     .btn:active { transform: translateY(1px); }
-    .row { margin-top:.5rem; }
+    .row { margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -45,75 +74,86 @@
     <h1 class="big" id="glyph">A</h1>
   </main>
 
-  <div class="ui">
-    <div id="supportMsg">Tap “Enable Motion” then tilt your iPhone.</div>
-    <div class="row"><button class="btn" id="enableBtn">Enable Motion</button></div>
+  <div class="ui" id="status">
+    <div id="supportMsg">Tilt your iPhone to animate the font.</div>
+    <div class="row">
+      <button class="btn" id="enableBtn" hidden>Enable Motion</button>
+    </div>
     <div class="row" id="readout" aria-live="polite"></div>
   </div>
 
   <script>
-    const params = new URLSearchParams(location.search);
-    const AXIS1 = (params.get('axis1') || 'wght').toLowerCase();
-    const AXIS2 = (params.get('axis2') || 'wdth').toLowerCase();
-    const WGHT_MIN = parseFloat(params.get('wmin') || 100);
-    const WGHT_MAX = parseFloat(params.get('wmax') || 900);
-    const WDTH_MIN = parseFloat(params.get('dmin') || 75);
-    const WDTH_MAX = parseFloat(params.get('dmax') || 125);
+    // Use the real axis tags for this font
+    const AXIS_WEIGHT = 'wght';
+    const AXIS_WIDTH  = 'wdth';
+
+    // Default ranges (adjust if balaVF uses a different min/max!)
+    const WGHT_MIN = 100, WGHT_MAX = 900;
+    const WDTH_MIN = 75,  WDTH_MAX = 125;
 
     const glyph = document.getElementById('glyph');
     const readout = document.getElementById('readout');
-    const supportMsg = document.getElementById('supportMsg');
     const enableBtn = document.getElementById('enableBtn');
+    const supportMsg = document.getElementById('supportMsg');
 
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
     function map(n, inMin, inMax, outMin, outMax) {
       const t = (n - inMin) / (inMax - inMin);
       return outMin + (outMax - outMin) * clamp(t, 0, 1);
     }
+
     function setAxes(wght, wdth) {
-      const s = `"${AXIS1}" ${wght.toFixed(0)}, "${AXIS2}" ${wdth.toFixed(0)}`;
+      const s = `"${AXIS_WEIGHT}" ${wght.toFixed(0)}, "${AXIS_WIDTH}" ${wdth.toFixed(0)}`;
       glyph.style.fontVariationSettings = s;
     }
+
     function onOrientation(e) {
-      const beta = e.gamma || 0;   // front/back tilt
-      const gamma = e.beta || 0; // left/right tilt
+      const beta  = e.beta || 0;   // front/back tilt
+      const gamma = e.gamma || 0;  // left/right tilt
 
-      // Map tilt to axes
-      const wght = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);
-      const wdth = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX);
+      const wght = map(gamma, -45, 45, WGHT_MIN, WGHT_MAX); // left↔right
+      const wdth = map(beta,  -45, 45, WDTH_MIN, WDTH_MAX); // front↔back
+
       setAxes(wght, wdth);
-
-      // Map gamma [-45,45] → hue [0,360]
-      const hue = map(gamma, -45, 45, 0, 360);
-      glyph.style.color = `hsl(${hue}, 100%, 50%)`;
-
-      readout.textContent = `${AXIS1.toUpperCase()}: ${wght.toFixed(0)}  ${AXIS2.toUpperCase()}: ${wdth.toFixed(0)}  HUE: ${hue.toFixed(0)}`;
+      readout.textContent = `WGHT: ${wght.toFixed(0)}  WDTH: ${wdth.toFixed(0)}`;
     }
 
-    // Init axes + color
-    setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
-    glyph.style.color = "hsl(0,100%,100%)";
+    async function initMotion() {
+      const supportsVar = CSS.supports('font-variation-settings', '"wght" 400');
+      if (!supportsVar) {
+        supportMsg.textContent = 'Your browser does not support variable fonts.';
+        return;
+      }
 
-    enableBtn.onclick = () => {
-      if (typeof DeviceMotionEvent !== 'undefined' &&
-          typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(res => {
-          if (res === 'granted') {
-            window.addEventListener('deviceorientation', onOrientation);
-            enableBtn.style.display = 'none';
-            supportMsg.textContent = 'Tilt your iPhone!';
-          } else {
-            supportMsg.textContent = 'Permission denied.';
+      const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function';
+
+      if (needsPermission) {
+        enableBtn.hidden = false;
+        supportMsg.textContent = 'Tap “Enable Motion” then tilt your iPhone.';
+        enableBtn.addEventListener('click', async () => {
+          try {
+            const res = await DeviceMotionEvent.requestPermission();
+            if (res === 'granted') {
+              enableBtn.hidden = true;
+              supportMsg.textContent = 'Motion enabled. Tilt to animate.';
+              window.addEventListener('deviceorientation', onOrientation);
+            } else {
+              supportMsg.textContent = 'Motion permission denied.';
+            }
+          } catch {
+            supportMsg.textContent = 'Motion permission failed.';
           }
-        }).catch(err => {
-          supportMsg.textContent = 'Permission failed: ' + err;
-        });
+        }, { once: true });
       } else {
         window.addEventListener('deviceorientation', onOrientation);
-        enableBtn.style.display = 'none';
-        supportMsg.textContent = 'Tilt your device!';
       }
-    };
+
+      // Initial state
+      setAxes((WGHT_MIN+WGHT_MAX)/2, (WDTH_MIN+WDTH_MAX)/2);
+    }
+
+    initMotion();
   </script>
 </body>
 </html>
