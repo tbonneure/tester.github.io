@@ -12,8 +12,15 @@
       font-stretch: 100% 200%;
       font-style: normal;
     }
+       @font-face {
+      font-family: 'varappVF';
+      src: url('varappVF.ttf') format('truetype');
+      font-weight: 1 1000;
+      font-stretch: 100% 200%;
+      font-style: normal;
+    }
     :root { --bg:#000; --fg:#fff; }
-    html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); }
+    html, body {  margin:0; background:var(--bg); color:var(--fg); }
     .wrap { position:static; inset:0; display:grid; place-items:center; touch-action:none; }
     .big {
       font-family:'balanceVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -27,6 +34,20 @@
       transition: font-variation-settings .05s linear, color .1s linear;
       color: white; /* start white */
     }
+
+   .bigb {
+      font-family:'varappVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      /* Fit viewport with 10px margin */
+      font-size: calc(min(100vw, 100vh) * 1.5)!important;
+      line-height:1;
+      margin:0;
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+      font-variation-settings:"wght" 400, "wdth" 100;
+      transition: font-variation-settings .05s linear, color .1s linear;
+      color: white; /* start white */
+    }
+    
     .ui {
       position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
       font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -43,6 +64,7 @@
 <body>
   <main class="wrap">
     <h1 class="big" id="glyph">A</h1>
+    <h1 class="bigb" id="glyph">A</h1>
   </main>
 
   <div class="ui">
