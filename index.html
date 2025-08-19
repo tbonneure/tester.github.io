@@ -111,8 +111,8 @@
       const beta  = e.beta || 0;   // front/back tilt
       const gamma = e.gamma || 0;  // left/right tilt
 
-      const wght = map(gamma, -45, 45, WGHT_MIN, WGHT_MAX); // left↔right
-      const wdth = map(beta,  45, -45, WDTH_MIN, WDTH_MAX); // front↔back
+      const wght = map(gamma, -20, 20, WGHT_MIN, WGHT_MAX); // left↔right
+      const wdth = map(beta,  20, -20, WDTH_MIN, WDTH_MAX); // front↔back
 
       setAxes(wght, wdth);
       readout.textContent = `WGHT: ${wght.toFixed(0)}  WDTH: ${wdth.toFixed(0)}`;
