@@ -1,9 +1,9 @@
-<!doctype html>
+	•	<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Variable Font Tilt Demo — scroll for samples</title>
+  <title>Variable Font Tilt Demo</title>
   <style>
     @font-face {
       font-family: 'balanceVF';
@@ -12,148 +12,46 @@
       font-stretch: 100% 200%;
       font-style: normal;
     }
-    @font-face {
-      font-family: 'varappVF';
-      src: url('varappVF.ttf') format('truetype');
-      font-weight: 1 1000;
-      font-stretch: 100% 200%;
-      font-style: normal;
-    }
-
     :root { --bg:#000; --fg:#fff; }
-    * { box-sizing: border-box; }
-    html, body { margin:0; background:var(--bg); color:var(--fg); }
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-
-    /* layout */
-    .section {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 2rem;
-    }
-    .hero {
-      position: relative;
-      overflow: hidden;
-    }
-    .panels {
-      display: grid;
-      gap: 6rem;
-      padding-block: 6rem;
-      background:
-        radial-gradient(1200px 600px at 50% -10%, #111 0%, transparent 60%),
-        #000;
-    }
-    .panel {
-      display: grid;
-      gap: 1rem;
-      max-width: min(1100px, 92vw);
-      margin-inline: auto;
-      padding: 2rem;
-      border: 1px solid #222;
-      border-radius: 24px;
-      background: #0b0b0b;
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
-    .panel h2 {
-      margin: 0;
-      font-size: clamp(18px, 3vw, 24px);
-      opacity: .8;
-      letter-spacing: .02em;
-    }
-
-    /* specimens */
+    html, body { height:100%; margin:0; background:var(--bg); color:var(--fg); }
+    .wrap { position:static; inset:0; display:grid; place-items:center; touch-action:none; }
     .big {
-      font-family: 'balanceVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: min(20vw, 40vh);
-      line-height: 1;
-      margin: 0;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      font-variation-settings: "wght" 400, "wdth" 100;
+      font-family:'balanceVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      /* Fit viewport with 10px margin */
+      font-size: calc(min(100vw, 100vh) * 1.5)!important;
+      line-height:1;
+      margin:0;
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+      font-variation-settings:"wght" 400, "wdth" 100;
       transition: font-variation-settings .05s linear, color .1s linear;
-      color: white;
-      user-select: none;
+      color: white; /* start white */
     }
-    .specimen {
-      font-size: clamp(32px, 14vw, 160px);
-      line-height: 0.9;
-      margin: 0;
-      text-wrap: balance;
-      font-variation-settings: "wght" 400, "wdth" 100;
-      letter-spacing: 0;
-    }
-    .specimen.balance { font-family: 'balanceVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .specimen.varapp  { font-family: 'varappVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-
-    /* ui */
     .ui {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font: 12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      opacity: .8;
-      text-align: center;
-      user-select: none;
-      z-index: 10;
+      position:fixed; bottom:1rem; left:50%; transform:translateX(-50%);
+      font:12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      opacity:.7; text-align:center; user-select:none;
     }
     .btn {
-      appearance: none;
-      border: 1px solid #444;
-      background: #111;
-      color: #fff;
-      padding: .6rem .9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
+      appearance:none; border:1px solid #444; background:#111; color:#fff;
+      padding:.6rem .9rem; border-radius:999px; cursor:pointer; font-weight:600;
     }
     .btn:active { transform: translateY(1px); }
-    .row { margin-top: .5rem; }
-
-    /* helper */
-    .hint {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      opacity: .6;
-      font-size: 12px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .big { transition: none; }
-    }
+    .row { margin-top:.5rem; }
   </style>
 </head>
 <body>
+  <main class="wrap">
+    <h1 class="big" id="glyph">A</h1>
+  </main>
 
-  <!-- hero: motion-reactive variable font -->
-  <section class="section hero" aria-label="Tilt reactive hero">
-    <h1 class="big" id="glyphHero">A</h1>
-    <div class="hint">scroll ↓ to view more fonts</div>
-  </section>
-
-  <!-- scrollable panels underneath -->
-  <section class="panels" aria-label="Font samples">
-    <article class="panel">
-      <h2>balanceVF</h2>
-      <p class="specimen balance" id="sampleBalance">Sphinx of black quartz, judge my vow.</p>
-    </article>
-
-    <article class="panel">
-      <h2>varappVF</h2>
-      <p class="specimen varapp" id="sampleVarapp">Pack my box with five dozen liquor jugs.</p>
-    </article>
-  </section>
-
-  <div class="ui" role="status">
+  <div class="ui">
     <div id="supportMsg">Tap “Enable Motion” then tilt your iPhone.</div>
-    <div class="row"><button class="btn" id="enableBtn" type="button">Enable Motion</button></div>
+    <div class="row"><button class="btn" id="enableBtn">Enable Motion</button></div>
     <div class="row" id="readout" aria-live="polite"></div>
   </div>
 
   <script>
-    // URL params to remap axes/ranges if desired
     const params = new URLSearchParams(location.search);
     const AXIS1 = (params.get('axis1') || 'wght').toLowerCase();
     const AXIS2 = (params.get('axis2') || 'wdth').toLowerCase();
@@ -162,9 +60,7 @@
     const WDTH_MIN = parseFloat(params.get('dmin') || 75);
     const WDTH_MAX = parseFloat(params.get('dmax') || 125);
 
-    const glyphHero = document.getElementById('glyphHero');
-    const sampleBalance = document.getElementById('sampleBalance');
-    const sampleVarapp = document.getElementById('sampleVarapp');
+    const glyph = document.getElementById('glyph');
     const readout = document.getElementById('readout');
     const supportMsg = document.getElementById('supportMsg');
     const enableBtn = document.getElementById('enableBtn');
@@ -174,84 +70,50 @@
       const t = (n - inMin) / (inMax - inMin);
       return outMin + (outMax - outMin) * clamp(t, 0, 1);
     }
-
-    function settingsString(w, d) {
-      return `"${AXIS1}" ${w.toFixed(0)}, "${AXIS2}" ${d.toFixed(0)}`;
+    function setAxes(wght, wdth) {
+      const s = `"${AXIS1}" ${wght.toFixed(0)}, "${AXIS2}" ${wdth.toFixed(0)}`;
+      glyph.style.fontVariationSettings = s;
     }
-
-    function applyAxes(w, d) {
-      // hero reacts to tilt + color
-      glyphHero.style.fontVariationSettings = settingsString(w, d);
-      const hue = map(d, WDTH_MIN, WDTH_MAX, 0, 360);
-      glyphHero.style.color = `hsl(${hue}, 100%, 50%)`;
-
-      // panels mirror axes so you can compare families
-      sampleBalance.style.fontVariationSettings = settingsString(w, d);
-      sampleVarapp.style.fontVariationSettings  = settingsString(w, d);
-
-      readout.textContent =
-        `${AXIS1.toUpperCase()}: ${w.toFixed(0)}  ${AXIS2.toUpperCase()}: ${d.toFixed(0)}`;
-    }
-
     function onOrientation(e) {
-      // iOS reports beta/gamma swapped relative to others; handle both
-      const beta  = (typeof e.gamma === 'number') ? e.gamma : 0; // front/back
-      const gamma = (typeof e.beta  === 'number') ? e.beta  : 0; // left/right
+      const beta = e.gamma || 0;   // front/back tilt
+      const gamma = e.beta || 0; // left/right tilt
 
-      const w = map(beta,  -45, 45, WGHT_MIN, WGHT_MAX);
-      const d = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX);
-      applyAxes(w, d);
+      // Map tilt to axes
+      const wght = map(beta, -45, 45, WGHT_MIN, WGHT_MAX);
+      const wdth = map(gamma, -45, 45, WDTH_MIN, WDTH_MAX);
+      setAxes(wght, wdth);
+
+      // Map gamma [-45,45] → hue [0,360]
+      const hue = map(gamma, -45, 45, 0, 360);
+      glyph.style.color = `hsl(${hue}, 100%, 50%)`;
+
+      readout.textContent = `${AXIS1.toUpperCase()}: ${wght.toFixed(0)}  ${AXIS2.toUpperCase()}: ${wdth.toFixed(0)}  HUE: ${hue.toFixed(0)}`;
     }
 
-    // initial midpoint settings
-    const W0 = (WGHT_MIN + WGHT_MAX) / 2;
-    const D0 = (WDTH_MIN + WDTH_MAX) / 2;
-    applyAxes(W0, D0);
-    glyphHero.style.color = "hsl(0, 100%, 100%)";
+    // Init axes + color
+    setAxes((WGHT_MIN + WGHT_MAX)/2, (WDTH_MIN + WDTH_MAX)/2);
+    glyph.style.color = "hsl(0,100%,100%)";
 
-    // motion permission + listener
-    enableBtn.addEventListener('click', () => {
+    enableBtn.onclick = () => {
       if (typeof DeviceMotionEvent !== 'undefined' &&
           typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(res => {
-            if (res === 'granted') {
-              window.addEventListener('deviceorientation', onOrientation);
-              enableBtn.style.display = 'none';
-              supportMsg.textContent = 'Tilt your iPhone!';
-            } else {
-              supportMsg.textContent = 'Permission denied.';
-            }
-          })
-          .catch(err => {
-            supportMsg.textContent = 'Permission failed: ' + err;
-          });
+        DeviceMotionEvent.requestPermission().then(res => {
+          if (res === 'granted') {
+            window.addEventListener('deviceorientation', onOrientation);
+            enableBtn.style.display = 'none';
+            supportMsg.textContent = 'Tilt your iPhone!';
+          } else {
+            supportMsg.textContent = 'Permission denied.';
+          }
+        }).catch(err => {
+          supportMsg.textContent = 'Permission failed: ' + err;
+        });
       } else {
-        // non-iOS or older iOS
         window.addEventListener('deviceorientation', onOrientation);
         enableBtn.style.display = 'none';
         supportMsg.textContent = 'Tilt your device!';
       }
-    }, { passive: true });
-
-    // keyboard fallback to test on desktop: arrows adjust axes
-    addEventListener('keydown', (ev) => {
-      const stepW = (WGHT_MAX - WGHT_MIN) / 50;
-      const stepD = (WDTH_MAX - WDTH_MIN) / 50;
-      let cur = getComputedStyle(glyphHero).fontVariationSettings;
-      let m = /"wght"\s*([\d.]+).*"wdth"\s*([\d.]+)/.exec(cur);
-      let w = m ? parseFloat(m[1]) : W0;
-      let d = m ? parseFloat(m[2]) : D0;
-
-      if (ev.key === 'ArrowUp')   w = clamp(w + stepW, WGHT_MIN, WGHT_MAX);
-      if (ev.key === 'ArrowDown') w = clamp(w - stepW, WGHT_MIN, WGHT_MAX);
-      if (ev.key === 'ArrowRight') d = clamp(d + stepD, WDTH_MIN, WDTH_MAX);
-      if (ev.key === 'ArrowLeft')  d = clamp(d - stepD, WDTH_MIN, WDTH_MAX);
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(ev.key)) {
-        applyAxes(w, d);
-        ev.preventDefault();
-      }
-    });
+    };
   </script>
 </body>
 </html>
