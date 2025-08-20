@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Variable Font Tilt Demo (Full Page Characters)</title>
+  <title>Variable Font Tilt Demo (3 Fonts)</title>
   <style>
     /* Load 3 separate variable fonts */
     @font-face {
@@ -15,16 +15,16 @@
     }
 
     @font-face {
-      font-family: 'varsansVF';
-      src: url('varsansVF.ttf') format('truetype');
+      font-family: 'balacVF';
+      src: url('balacVF.ttf') format('truetype');
       font-weight: 1 1000;
       font-stretch: 50% 200%;
       font-style: normal;
     }
 
     @font-face {
-      font-family: 'vardisplayVF';
-      src: url('vardisplayVF.ttf') format('truetype');
+      font-family: 'balVF';
+      src: url('balVF.ttf') format('truetype');
       font-weight: 1 1000;
       font-stretch: 50% 200%;
       font-style: normal;
@@ -40,20 +40,21 @@
       margin: 0;
       background: var(--bg);
       color: var(--fg);
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
     }
 
-    section {
-      height: 100vh; /* full viewport height */
+    .wrap {
+      position: fixed;
+      inset: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      scroll-snap-align: start;
+      gap: 1rem;
+      touch-action: none;
     }
 
     .big {
-      font-size: calc(min(100vw, 100vh) * 0.9);
+      font-size: calc(min(100vw, 100vh) * 0.5);
       line-height: 1;
       margin: 0;
       text-rendering: optimizeLegibility;
@@ -71,9 +72,6 @@
       opacity: 0.7;
       text-align: center;
       user-select: none;
-      background: rgba(255,255,255,0.5);
-      padding: 0.3rem 0.6rem;
-      border-radius: 0.5rem;
     }
 
     .btn {
@@ -90,21 +88,17 @@
     .row { margin-top: 0.5rem; }
 
     /* Different fonts per character */
-    .glyph1 { font-family: 'varserifVF', serif; }
-    .glyph2 { font-family: 'varsansVF', sans-serif; }
-    .glyph3 { font-family: 'vardisplayVF', sans-serif; }
+    .glyph1 { font-family: 'balacVF', serif; }
+    .glyph2 { font-family: 'varserifVF', sans-serif; }
+    .glyph3 { font-family: 'balVF', sans-serif; }
   </style>
 </head>
 <body>
-  <section>
-    <h1 class="big glyph1">N</h1>
-  </section>
-  <section>
-    <h1 class="big glyph2">A</h1>
-  </section>
-  <section>
-    <h1 class="big glyph3">Z</h1>
-  </section>
+  <main class="wrap">
+    <h1 class="big glyph1">A</h1>
+    <h1 class="big glyph2">n</h1>
+    <h1 class="big glyph3">A</h1>
+  </main>
 
   <div class="ui" id="status">
     <div id="supportMsg">Tilt your iPhone to animate the font.</div>
