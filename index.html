@@ -3,11 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Variable Font Tilt Demo</title>
+  <title>Variable Font Tilt Demo (3 Fonts)</title>
   <style>
+    /* Load 3 separate variable fonts */
     @font-face {
       font-family: 'varserifVF';
       src: url('varserifVF.ttf') format('truetype');
+      font-weight: 1 1000;
+      font-stretch: 50% 200%;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'varsansVF';
+      src: url('varsansVF.ttf') format('truetype');
+      font-weight: 1 1000;
+      font-stretch: 50% 200%;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'vardisplayVF';
+      src: url('vardisplayVF.ttf') format('truetype');
       font-weight: 1 1000;
       font-stretch: 50% 200%;
       font-style: normal;
@@ -28,14 +45,16 @@
     .wrap {
       position: fixed;
       inset: 0;
-      display: grid;
-      place-items: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
       touch-action: none;
     }
 
     .big {
-      font-family: 'varserifVF', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      font-size: calc(min(100vw, 100vh)*1.6 );
+      font-size: calc(min(100vw, 100vh) * 0.5);
       line-height: 1;
       margin: 0;
       text-rendering: optimizeLegibility;
@@ -67,11 +86,18 @@
     }
     .btn:active { transform: translateY(1px); }
     .row { margin-top: 0.5rem; }
+
+    /* Different fonts per character */
+    .glyph1 { font-family: 'varserifVF', serif; }
+    .glyph2 { font-family: 'varsansVF', sans-serif; }
+    .glyph3 { font-family: 'vardisplayVF', sans-serif; }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <h1 class="big" id="glyph">n</h1>
+    <h1 class="big glyph1">n</h1>
+    <h1 class="big glyph2">a</h1>
+    <h1 class="big glyph3">z</h1>
   </main>
 
   <div class="ui" id="status">
@@ -83,15 +109,13 @@
   </div>
 
   <script>
-    // Use the real axis tags for this font
     const AXIS_WEIGHT = 'wght';
     const AXIS_WIDTH  = 'wdth';
 
-    // Default ranges (adjust if balaVF uses a different min/max!)
     const WGHT_MIN = 100, WGHT_MAX = 900;
     const WDTH_MIN = 50,  WDTH_MAX = 150;
 
-    const glyph = document.getElementById('glyph');
+    const glyphs = document.querySelectorAll('.big');
     const readout = document.getElementById('readout');
     const enableBtn = document.getElementById('enableBtn');
     const supportMsg = document.getElementById('supportMsg');
@@ -104,15 +128,15 @@
 
     function setAxes(wght, wdth) {
       const s = `"${AXIS_WEIGHT}" ${wght.toFixed(0)}, "${AXIS_WIDTH}" ${wdth.toFixed(0)}`;
-      glyph.style.fontVariationSettings = s;
+      glyphs.forEach(g => g.style.fontVariationSettings = s);
     }
 
     function onOrientation(e) {
-      const beta  = e.beta || 0;   // front/back tilt
-      const gamma = e.gamma || 0;  // left/right tilt
+      const beta  = e.beta || 0;
+      const gamma = e.gamma || 0;
 
-      const wght = map(gamma, -30, 30, WGHT_MIN, WGHT_MAX); // left↔right
-      const wdth = map(beta,  30, -30, WDTH_MIN, WDTH_MAX); // front↔back
+      const wght = map(gamma, -30, 30, WGHT_MIN, WGHT_MAX);
+      const wdth = map(beta,  30, -30, WDTH_MIN, WDTH_MAX);
 
       setAxes(wght, wdth);
       readout.textContent = `WGHT: ${wght.toFixed(0)}  WDTH: ${wdth.toFixed(0)}`;
@@ -149,7 +173,6 @@
         window.addEventListener('deviceorientation', onOrientation);
       }
 
-      // Initial state
       setAxes((WGHT_MIN+WGHT_MAX)/2, (WDTH_MIN+WDTH_MAX)/2);
     }
 
