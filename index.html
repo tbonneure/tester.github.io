@@ -159,7 +159,7 @@
             const res = await DeviceMotionEvent.requestPermission();
             if (res === 'granted') {
               enableBtn.hidden = true;
-              supportMsg.textContent = 'Motion enabled. Tilt to animate.';
+              supportMsg.textContent = 'Motion enabled. Tilt to animate. Scroll for more';
               window.addEventListener('deviceorientation', onOrientation);
             } else {
               supportMsg.textContent = 'Motion permission denied.';
