@@ -1,182 +1,418 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Variable Font Tilt Demo (Full Page Scroll)</title>
-  <style>
-    /* Load 3 separate variable fonts */
-    @font-face {
-      font-family: 'doVF';
-      src: url('doVF.ttf') format('truetype');
-      font-weight: 1 1000;
-      font-stretch: 50% 200%;
-      font-style: normal;
-    }
 
-    @font-face {
-      font-family: 'balacVF';
-      src: url('balacVF.ttf') format('truetype');
-      font-weight: 1 1000;
-      font-stretch: 50% 200%;
-      font-style: normal;
-    }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  @font-face {
+    font-family: tempu;
+    src: url(TempuratureVF.ttf);
+  }
 
-    :root {
-      --fg: #000;
-    /*  --bg: #ff8c00;*/
-    --bg:  #ff8C00;
-    }
+  .page {
+    padding: 2rem 1.5rem 3rem;
+    font-family: executive;
+    -webkit-font-smoothing: antialiased;
+  }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
-    }
+  .none { display: none; }
 
-    section {
-      height: 100vh;              /* full screen per character */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      scroll-snap-align: start;
-    }
+  .meta {
+    font-size: 13px;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    z-index: 10;
+  }
 
-    .big {
-      font-size: calc(min(100vw, 100vh) * 1.6);
-      line-height: 1;
-      margin: 0;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-      font-variation-settings: "wght" 400, "wdth" 100;
-      transition: font-variation-settings 0.05s linear;
-    }
+  .weather-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 0.5px solid var(--color-border-tertiary);
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    background: var(--color-background-secondary);
+  }
 
-    .ui {
-      position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font: 12px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      opacity: 1;
-      text-align: center;
-      user-select: none;
-      padding: 0rem 0rem;
-      width:100%;
-      border-radius: 0.5rem;
-    }
+  .temp-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #378ADD;
+    transition: background 0.8s ease;
+  }
 
-    .btn {
-      appearance: none;
-      border: 1px solid #000;
-      background:#ff8C00;
-      color: #000;
-      padding: 0.6rem 0.9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn:active { transform: translateY(1px); }
-    .row { margin-top: 0.5rem; }
+  .headline-wrap {
+    width: 100vw;
+    height: 100vh;
+    left: 0px;
+    top: 0px;
+    overflow: hidden;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    background: var(--color-background-secondary);
+    display: flex;
+    z-index: -9;
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+  }
 
-    /* Different fonts per character */
-    .glyph1 { font-family: 'balacVF', serif; }
-    .glyph2 { font-family: 'doVF', sans-serif; translateY:-100px; line-height:-100px}
-    .glyph3 { font-family: 'doVF', sans-serif; }
-  </style>
-</head>
-<body>
-  <section>
-    <h1 class="big glyph1">A</h1>
-  </section>
-  <section>
-    <h1 class="big glyph2">n</h1>
-  </section>
-  <section>
-    <h1 class="big glyph3">A</h1>
-  </section>
+  .headline {
+    font-family: 'tempu', serif;
+    white-space: nowrap;
+    display: block;
+    line-height: 1;
+    font-size: calc(100vw / 2) !important;
+    text-align: center;
+    width: 100vw;
+    transform: translateY(30px);
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    transition: font-variation-settings 0.8s ease;
+  }
 
-  <div class="ui" id="status">
-    <div id="supportMsg">Tilt your iPhone to animate the font.<br> Scroll for more </div>
-    <div class="row">
-      <button class="btn" id="enableBtn" hidden>Enable Motion</button>
+  .body-text {
+    font-family: 'courier', serif;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+    max-width: 540px;
+    transition: font-variation-settings 0.8s ease;
+  }
+
+  .axis-bar {
+    position: fixed;
+    width: 500px;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgb(233, 233, 233);
+    padding: 1.25rem 1.5rem;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    z-index: 10;
+  }
+
+  .axis-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.75rem;
+  }
+
+  .axis-track {
+    position: relative;
+    height: 4px;
+    background: var(--color-border-tertiary);
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+    display: none;
+  }
+
+  .axis-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: #378ADD;
+    transition: width 0.8s ease, background 0.8s ease;
+  }
+
+  .axis-thumb {
+    position: absolute;
+    top: 50%;
+    display: none;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: black;
+    border: 2px solid var(--color-background-primary);
+    transition: left 0.8s ease, background 0.8s ease;
+  }
+
+  #temp-slider{
+    -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 3px; /* Specified height */
+  background: #d3d3d3; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+  }
+
+  .slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+  }
+
+  .slider-label { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
+  #temp-slider { flex: 1; }
+  .temp-display { font-size: 14px; font-weight: 500; color: var(--color-text-primary); min-width: 50px; text-align: right; }
+  .axis-info { margin-top: 0.75rem; font-size: 12px; color: var(--color-text-tertiary); }
+  .axis-info span { color: var(--color-text-primary); font-weight: 500; }
+
+  .status-msg {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    margin-bottom: 0.5rem;
+    min-height: 16px;
+  }
+
+  .custom-wrap {
+    width: 100%;
+    overflow: hidden;
+    line-height: 1;
+  }
+
+  .custom-display {
+    font-family: 'tempu', serif;
+    white-space: nowrap;
+    display: block;
+    line-height: 1.1;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    transition: font-variation-settings 0.8s ease;
+  }
+
+  .text-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .text-input-label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    display: hide;
+  }
+
+  .text-input-field {
+    flex: 1;
+    display: none;
+    font-family: 'tempu', serif;
+    font-size: 14px;
+    padding: 6px 10px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    background: transparent;
+    color: var(--color-text-primary);
+    outline: none;
+    transition: font-variation-settings 0.8s ease, border-color 0.2s;
+  }
+
+  .text-input-field:focus {
+    border-color: var(--color-border-primary);
+  }
+</style>
+
+<div class="page">
+  <div class="meta">
+    <div class="weather-pill">
+      <div class="temp-dot" id="temp-dot"></div>
+      <span id="location-label">Locating…</span>
     </div>
-    <div class="row" id="readout" aria-live="polite"></div>
+    <span class="temp-display" id="slider-temp-display">—</span>
+    Current: <span id="wght-value">—</span> wght
   </div>
 
-  <script>
-    const AXIS_WEIGHT = 'wght';
-    const AXIS_WIDTH  = 'wdth';
+  <div class="headline-wrap" id="headline-wrap">
+    <span class="headline" id="headline">T</span>
+  </div>
 
-    const WGHT_MIN = 100, WGHT_MAX = 900;
-    const WDTH_MIN = 50,  WDTH_MAX = 150;
+  <div class="body-text" id="body-text"></div>
 
-    const glyphs = document.querySelectorAll('.big');
-    const readout = document.getElementById('readout');
-    const enableBtn = document.getElementById('enableBtn');
-    const supportMsg = document.getElementById('supportMsg');
+  <div class="axis-bar">
+    <div class="axis-label">Temperature OTF</div>
+    <div class="status-msg" id="status-msg">Requesting location…</div>
 
-    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
-    function map(n, inMin, inMax, outMin, outMax) {
-      const t = (n - inMin) / (inMax - inMin);
-      return outMin + (outMax - outMin) * clamp(t, 0, 1);
+    <div class="axis-track">
+      <div class="axis-fill" id="axis-fill"></div>
+      <div class="axis-thumb" id="axis-thumb"></div>
+    </div>
+
+    <div class="slider-row">
+      <span class="slider-label">Override temperature</span>
+      <input type="range" id="temp-slider" min="0" max="40" step="1" value="12">
+      <span class="temp-display" id="slider-temp-display2">12°C</span>
+    </div>
+
+    <p style="margin-top:0.75rem;">Outside, the air sits at <strong id="temp-inline">—</strong>. That temperature is mapped directly to this font's weight axis — cold air makes letters lean thin, warmth rounds them into weight.</p>
+
+    <div class="text-input-row">
+      <span class="text-input-label">Your text</span>
+      <input class="text-input-field" id="custom-input" type="text" placeholder="Type something…" maxlength="80" />
+    </div>
+
+    <div class="custom-wrap" id="custom-wrap" style="margin-top:0.5rem; min-height: 1.2rem;">
+      <span class="custom-display" id="custom-display" style="opacity:0; font-size:1rem;"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TEMP_MIN = 0, TEMP_MAX = 40;
+  const WGHT_MIN = 100, WGHT_MAX = 900;
+  const COLORS = { cold:'#85B7EB', cool:'#378ADD', mild:'#1D9E75', warm:'#EF9F27', hot:'#D85A30' };
+
+  let currentWeight = 300;
+  let liveTemp = null;
+
+  function tempToWeight(t) {
+    const r = (Math.max(TEMP_MIN, Math.min(TEMP_MAX, t)) - TEMP_MIN) / (TEMP_MAX - TEMP_MIN);
+    return Math.round(WGHT_MIN + r * (WGHT_MAX - WGHT_MIN));
+  }
+
+  function tempToColor(t) {
+    if (t < 0)  return COLORS.cold;
+    if (t < 10) return COLORS.cool;
+    if (t < 20) return COLORS.mild;
+    if (t < 30) return COLORS.warm;
+    return COLORS.hot;
+  }
+
+  function fitEl(wrapId, elId, wght) {
+    const wrap = document.getElementById(wrapId);
+    const el   = document.getElementById(elId);
+    el.style.fontVariationSettings = `'wght' ${wght}`;
+    el.style.fontSize = '100px';
+    const availW = wrap.clientWidth;
+    if (!availW || !el.textContent.trim()) return;
+    const naturalW = el.scrollWidth;
+    el.style.fontSize = Math.floor(100 * (availW / naturalW)) + 'px';
+  }
+
+  function applyTemp(t) {
+    const wght  = tempToWeight(t);
+    const color = tempToColor(t);
+    currentWeight = wght;
+
+    const fvs = `'wght' ${wght}`;
+    document.getElementById('body-text').style.fontVariationSettings = fvs;
+    document.getElementById('temp-dot').style.background  = color;
+    document.getElementById('wght-value').textContent     = wght;
+    document.getElementById('slider-temp-display').textContent  = t.toFixed(1) + '°C';
+    document.getElementById('slider-temp-display2').textContent = t.toFixed(1) + '°C';
+    document.getElementById('temp-inline').textContent    = t.toFixed(1) + '°C';
+    document.getElementById('temp-slider').value          = Math.round(t);
+
+    fitEl('headline-wrap', 'headline', wght);
+
+    const customEl = document.getElementById('custom-display');
+    if (customEl.textContent.trim()) {
+      customEl.style.opacity = '1';
+      fitEl('custom-wrap', 'custom-display', wght);
     }
 
-    function setAxes(wght, wdth) {
-      const s = `"${AXIS_WEIGHT}" ${wght.toFixed(0)}, "${AXIS_WIDTH}" ${wdth.toFixed(0)}`;
-      glyphs.forEach(g => g.style.fontVariationSettings = s);
+    document.getElementById('custom-input').style.fontVariationSettings = fvs;
+  }
+
+  async function fetchWeather(lat, lon) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.current_weather.temperature;
+  }
+
+  async function reverseGeocode(lat, lon) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+      const country = data.address.country_code ? data.address.country_code.toUpperCase() : '';
+      return city ? `${city}, ${country}` : country;
+    } catch {
+      return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+    }
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status-msg').textContent = msg;
+  }
+
+  async function initLocation() {
+    if (!navigator.geolocation) {
+      setStatus('Geolocation not supported — drag slider to set temperature.');
+      applyTemp(12);
+      return;
     }
 
-    function onOrientation(e) {
-      const beta  = e.beta || 0;
-      const gamma = e.gamma || 0;
+    setStatus('Requesting location…');
 
-      const wght = map(gamma, -30, 30, WGHT_MIN, WGHT_MAX);
-      const wdth = map(beta,  30, -30, WDTH_MIN, WDTH_MAX);
-
-      setAxes(wght, wdth);
-      readout.textContent = `WGHT: ${wght.toFixed(0)}  WDTH: ${wdth.toFixed(0)}`;
-    }
-
-    async function initMotion() {
-      const supportsVar = CSS.supports('font-variation-settings', '"wght" 400');
-      if (!supportsVar) {
-        supportMsg.textContent = 'Your browser does not support variable fonts.';
-        return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        setStatus('Fetching temperature…');
+        try {
+          const [temp, place] = await Promise.all([
+            fetchWeather(lat, lon),
+            reverseGeocode(lat, lon)
+          ]);
+          liveTemp = temp;
+          document.getElementById('location-label').textContent = place || 'Your location';
+          setStatus(`Live temperature from Open-Meteo`);
+          document.fonts.ready.then(() => applyTemp(temp));
+        } catch (e) {
+          setStatus('Could not fetch weather — drag slider to set temperature.');
+          document.fonts.ready.then(() => applyTemp(12));
+        }
+      },
+      (err) => {
+        const msgs = {
+          1: 'Location denied — drag slider to set temperature.',
+          2: 'Location unavailable — drag slider to set temperature.',
+          3: 'Location timed out — drag slider to set temperature.',
+        };
+        setStatus(msgs[err.code] || 'Location error — drag slider to set temperature.');
+        document.getElementById('location-label').textContent = 'Unknown location';
+        document.fonts.ready.then(() => applyTemp(12));
       }
+    );
+  }
 
-      const needsPermission = typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function';
+  document.getElementById('temp-slider').addEventListener('input', function () {
+    setStatus('Manual override');
+    applyTemp(parseFloat(this.value));
+  });
 
-      if (needsPermission) {
-        enableBtn.hidden = false;
-        supportMsg.textContent = 'Tap “Enable Motion” then tilt your iPhone.';
-        enableBtn.addEventListener('click', async () => {
-          try {
-            const res = await DeviceMotionEvent.requestPermission();
-            if (res === 'granted') {
-              enableBtn.hidden = true;
-              supportMsg.textContent = 'Motion enabled. Tilt to animate. Scroll for more';
-              window.addEventListener('deviceorientation', onOrientation);
-            } else {
-              supportMsg.textContent = 'Motion permission denied.';
-            }
-          } catch {
-            supportMsg.textContent = 'Motion permission failed.';
-          }
-        }, { once: true });
-      } else {
-        window.addEventListener('deviceorientation', onOrientation);
-      }
-
-      setAxes((WGHT_MIN+WGHT_MAX)/2, (WDTH_MIN+WDTH_MAX)/2);
+  document.getElementById('custom-input').addEventListener('input', function () {
+    const el = document.getElementById('custom-display');
+    if (this.value.trim()) {
+      el.textContent   = this.value;
+      el.style.opacity = '1';
+      fitEl('custom-wrap', 'custom-display', currentWeight);
+    } else {
+      el.textContent   = '';
+      el.style.opacity = '0';
+      el.style.fontSize = '1rem';
     }
+  });
 
-    initMotion();
-  </script>
-</body>
-</html>
+  const ro = new ResizeObserver(() => applyTemp(parseFloat(document.getElementById('temp-slider').value)));
+  ro.observe(document.getElementById('headline-wrap'));
+
+  initLocation();
+</script>
